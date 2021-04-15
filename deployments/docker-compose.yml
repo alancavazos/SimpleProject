@@ -1,4 +1,4 @@
-version: "2"
+version: "3.4"
 services:
   app:
     container_name: Team5Project6
@@ -7,4 +7,11 @@ services:
       dockerfile: deployments/app/Dockerfile
     ports:
       - "5000:5000"
-      
+    networks:
+      - webnet
+  redis:
+    image: redis
+    networks:
+      - webnet
+networks:
+  webnet:
