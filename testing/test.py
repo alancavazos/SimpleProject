@@ -8,9 +8,6 @@ import sys
 import argparse
 import subprocess
 
-HOSTNAME = args.HOSTNAME
-PORT = args.PORT
-
 # Some constants for the API tests...
 HASH_1 = '098f6bcd4621d373cade4e832627b4f6'   # 'test'
 HASH_2 = '5eb63bbbe01eeed093cb22bb8f5acdc3'   # 'hello world'
