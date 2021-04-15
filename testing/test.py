@@ -8,14 +8,6 @@ import sys
 import argparse
 import subprocess
 
-# Helper functions
-def flatten(list):
-    if len(list) > 1:
-        return list
-    else:
-        return list[0]
-
-# Grab the HOSTNAME and PORT to use for the HTTP connection from commandline arguments
 parser = argparse.ArgumentParser(description='Testing REST API.')
 parser.add_argument('--host', dest='HOSTNAME', default='DOCKER_HOST', help='Specify the hostname for the API (default: DOCKER_HOST)')
 parser.add_argument('--port', dest='PORT', default='5000', help='Specify port on the API host (default: 5000)')
@@ -24,12 +16,9 @@ args = parser.parse_args()
 HOSTNAME = args.HOSTNAME
 PORT = args.PORT
 
-# Handle the special case of 'DOCKER_HOST'
 if HOSTNAME == 'DOCKER_HOST':
-    # group the docker host's IP address using the shell and `ip route`
     HOSTNAME = subprocess.check_output(["/sbin/ip route | awk '/default/ { print $3 }'"], shell=True).strip()
 
-# Check that the host and port are valid; exit with error if they are not
 try:
     r = requests.get('http://' + HOSTNAME + ':' + PORT + '/md5/test')
 except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.InvalidURL):
@@ -39,7 +28,6 @@ except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, reques
 else:
     print "Testing REST API on %s:%s...\n" % (HOSTNAME, PORT)
 
-# Some constants for the API tests...
 HASH_1 = '098f6bcd4621d373cade4e832627b4f6'   # 'test'
 HASH_2 = '5eb63bbbe01eeed093cb22bb8f5acdc3'   # 'hello world'
 FIB_SEQ = [0,1,1,2,3,5,8,13,21,34]
@@ -47,7 +35,6 @@ HTTP_ENCODE = "This%20is%20a%20longer%20string.%0D%0AIt%20even%20includes%20a%20
 
 print "Testing API\n"
 
-# Describe all the API tests: URL, method, status code, JSON('output'), [ JSON('key'), JSON('value') ]
 tests = [
     ('/md5/test',                 'GET',  [200], HASH_1),
     ('/md5/hello%20world',        'GET',  [200], HASH_2),
@@ -81,14 +68,12 @@ FAILED = 0
 PASSED = 0
 for t in tests:
 
-    # Set up the parts for the HTTP call
     ENDPOINT = t[0]
     URL = 'http://' + HOSTNAME + ':' + PORT + ENDPOINT
     METHOD = t[1]
     STATUS = t[2]
     EXP_RESULT = t[3]
 
-    # Determine which type of HTTP call to Make
     if METHOD == 'GET':
         resp = requests.get(URL)
     else:
@@ -98,20 +83,16 @@ for t in tests:
         else:
             resp = requests.put(URL, json=JSON_PAYLOAD)
 
-    # Start printing the output for the test results
     print " * ", ENDPOINT[:28], "... ".ljust(35-len(ENDPOINT[:28])),
 
-    # Check the HTTP status code first
     if resp.status_code in STATUS:
 
-        # Get the result from the 'output' key in the JSON response
         _no_json = "Cannot read JSON payload (failed to locate 'output' key)!"
         try:
             JSON_RESULT = resp.json().get('output', _no_json)
         except:
             JSON_RESULT = False
 
-        # Check the tests array for the expected results
         if EXP_RESULT == None or JSON_RESULT == EXP_RESULT:
             print "Pass"
             PASSED += 1
@@ -122,16 +103,10 @@ for t in tests:
             print " DEBUG -- %s" % resp.json()
             FAILED += 1
 
-    # If the status code was not in the list of expected results
     else:
         print "Fail"
         print "          - Expected HTTP status: %s" % flatten(STATUS)
         print "          - Actual HTTP status:   %i" % resp.status_code
         FAILED += 1
 
-# Calculate the passing rate
-rate = float(PASSED) / float(FAILED+PASSED) * 100.0
-print "\n\n Passed %i of %i tests (%i%% Success rate)" % (PASSED, FAILED+PASSED, rate)
-
-# Return a value to indicate success / failure
 sys.exit(FAILED)
