@@ -14,30 +14,28 @@ HASH_2 = '5eb63bbbe01eeed093cb22bb8f5acdc3'   # 'hello world'
 FIB_SEQ = [0,1,1,2,3,5,8,13,21,34]
 HTTP_ENCODE = "This%20is%20a%20longer%20string.%0D%0AIt%20even%20includes%20a%20newline..."
 
-print "Testing API\n"
-
 tests = [
     ('/md5/test',                 'GET',  [200], HASH_1),
     ('/md5/hello%20world',        'GET',  [200], HASH_2),
     ('/md5',                      'GET',  [400,404,405], None),
     ('/factorial/4',              'GET',  [200], 24),
-    ('/factorial/test',           'GET',  [400,404,405], None),
+    ('/factorial/check',           'GET',  [400,404,405], None),
     ('/factorial/0',              'GET',  [200], 1),
     ('/fibonacci/8',              'GET',  [200], FIB_SEQ[:7]),
     ('/fibonacci/35',             'GET',  [200], FIB_SEQ),
     ('/fibonacci/test',           'GET',  [400,404,405], None),
     ('/is-prime/1',               'GET',  [200], False),
     ('/is-prime/2',               'GET',  [200], True),
-    ('/slack-alert/test',         'GET',  [200], True),
+    ('/slack-alert/check',         'GET',  [200], True),
     ('/slack-alert/'+HTTP_ENCODE, 'GET',  [200], True),
-    ('/kv-retrieve/test1',        'GET',  [400,404,405], False),
-    ('/kv-record/test1',          'POST', [200], True, 'test1', 'fun'),
-    ('/kv-retrieve/test1',        'GET',  [200], 'fun'),
-    ('/kv-record/test1',          'POST', [400,404,405,409], False, 'test1', 'fun'),
-    ('/kv-record/test2',          'POST', [200], True, 'test2', '34'),
-    ('/kv-record/test1',          'PUT',  [200], True, 'test1', 'thing'),
-    ('/kv-retrieve/test1',        'GET',  [200], 'thing'),
-    ('/kv-record/test3',          'PUT',  [400,404,405,409], False, 'test3', '54')
+    ('/kv-retrieve/test',        'GET',  [400,404,405], False),
+    ('/kv-record/test',          'POST', [200], True, 'test1', 'fun'),
+    ('/kv-retrieve/test',        'GET',  [200], 'fun'),
+    ('/kv-record/test',          'POST', [400,404,405,409], False, 'test1', 'fun'),
+    ('/kv-record/test1',          'POST', [200], True, 'test2', '34'),
+    ('/kv-record/test',          'PUT',  [200], True, 'test1', 'thing'),
+    ('/kv-retrieve/test',        'GET',  [200], 'thing'),
+    ('/kv-record/test2',          'PUT',  [400,404,405,409], False, 'test3', '54')
 ]
 
 FAILED = 0
