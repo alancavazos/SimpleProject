@@ -2,3 +2,4 @@ flask
 Flask
 jsonify
 Redis
+requests==2.18.4
