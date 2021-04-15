@@ -8,13 +8,6 @@ import sys
 import argparse
 import subprocess
 
-# Helper functions
-def flatten(list):
-    if len(list) > 1:
-        return list
-    else:
-        return list[0]
-
 # Grab the HOSTNAME and PORT to use for the HTTP connection from commandline arguments
 parser = argparse.ArgumentParser(description='Testing REST API.')
 parser.add_argument('--host', dest='HOSTNAME', default='DOCKER_HOST', help='Specify the hostname for the API (default: DOCKER_HOST)')
@@ -47,7 +40,6 @@ HTTP_ENCODE = "This%20is%20a%20longer%20string.%0D%0AIt%20even%20includes%20a%20
 
 print "Testing API\n"
 
-# Describe all the API tests: URL, method, status code, JSON('output'), [ JSON('key'), JSON('value') ]
 tests = [
     ('/md5/test',                 'GET',  [200], HASH_1),
     ('/md5/hello%20world',        'GET',  [200], HASH_2),
@@ -105,7 +97,7 @@ for t in tests:
     if resp.status_code in STATUS:
 
         # Get the result from the 'output' key in the JSON response
-        _no_json = "Cannot read JSON payload (failed to locate 'output' key)!"
+        _no_json = "Failed to locate output key"
         try:
             JSON_RESULT = resp.json().get('output', _no_json)
         except:
@@ -128,10 +120,6 @@ for t in tests:
         print "          - Expected HTTP status: %s" % flatten(STATUS)
         print "          - Actual HTTP status:   %i" % resp.status_code
         FAILED += 1
-
-# Calculate the passing rate
-rate = float(PASSED) / float(FAILED+PASSED) * 100.0
-print "\n\n Passed %i of %i tests (%i%% Success rate)" % (PASSED, FAILED+PASSED, rate)
 
 # Return a value to indicate success / failure
 sys.exit(FAILED)
