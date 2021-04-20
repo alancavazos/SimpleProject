@@ -79,38 +79,45 @@ def alert(text):
         return f"{x}\n\"input\": {text},\n\"output\": {b}\n{y}"
     alert(f'{text}')
     
-@app.route('/keyval', methods=['POST','PUT'])
-def ppkey(key):
-    json = JsonResponse(command='CREATE' if request.method=='POST' else 'UPDATE')
+@app.route('/keyval', methods=['POST', 'PUT'])
+def kv_upsert():
+    _JSON = {
+        'key': None,
+        'value': None,
+        'command': 'CREATE' if request.method=='POST' else 'UPDATE',
+        'result': False,
+        'error': None
+    }
 
     try:
         payload = request.get_json()
-        json.key = payload['key']
-        json.value = payload['value']
-        json.command = f"{payload['key']}/{payload['value']}"
+        _JSON['key'] = payload['key']
+        _JSON['value'] = payload['value']
+        _JSON['command'] += f" {payload['key']}/{payload['value']}"
     except:
-        json.error = 'Missing or malforced JSON in client request.'
-        return jsonify(json), 400
+        _JSON['error'] = "Missing or malformed JSON in client request."
+        return jsonify(_JSON), 400
 
     try:
-        test = redis.get(json.key)
-    except:
-        json.error = 'Cannot connect to redis.'
-        return jsonify(json), 400
+        test_value = redis.get(_JSON['key'])
+    except RedisError:
+        _JSON['error'] = "Cannot connect to redis."
+        return jsonify(_JSON), 400
+    
+    if request.method == 'POST' and not test_value == None:
+        _JSON['error'] = "Cannot create new record: key already exists."
+        return jsonify(_JSON), 409
+    else if request.method == 'PUT' and test_value == None:
+        _JSON['error'] = "Cannot update record: key does not exist."
+        return jsonify(_JSON), 404
 
-    if request.method == 'POST' and not test == None:
-        json.error = "Key already exists."
-        return jsonify(json), 409
-    elif request.method == 'PUT' and not test == None:
-        json.error = "Key does not exist"
-        return jsonify(json), 404
     else:
-        if redis.set(json.key, json.value) == False:
-            json.error = "There was a problem creating the value in Redis."
-            return jsonify(json), 400
+        if redis.set(_JSON['key'], _JSON['value']) == False:
+            _JSON['error'] = "There was a problem creating the value in Redis."
+            return jsonify(_JSON), 400
         else:
-            json.result = True
-            return jsonify(json), 200
+            _JSON['result'] = True
+            return jsonify(_JSON), 200
 
 @app.route('/keyval/<string:k>', methods=['GET','DELETE'])
 def gdkey(k):
