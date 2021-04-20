@@ -6,6 +6,7 @@ import string
 import random
 import os
 import socket
+import hashlib
 from redis import Redis, RedisError
 from flask import Flask, Response, jsonify, request
 from urllib.parse import urlparse, urlencode, quote_plus
