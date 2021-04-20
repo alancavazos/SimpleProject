@@ -106,8 +106,8 @@ def kv_upsert():
     
     if request.method == 'POST' and not test_value == None:
         _JSON['error'] = "Cannot create new record: key already exists."
-        return jsonify(_JSON), 409
-    else if request.method == 'PUT' and test_value == None:
+        return jsonify(_JSON), 409 
+    if request.method == 'PUT' and test_value == None:
         _JSON['error'] = "Cannot update record: key does not exist."
         return jsonify(_JSON), 404
 
