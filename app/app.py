@@ -140,10 +140,10 @@ def gdkey(k):
         JSON['value'] = test.decode('unicode-escape')
 
     if request.method == 'GET':
-        json['result'] = True
+        JSON['result'] = True
         return jsonify(JSON), 200
     elif request.method == 'DELETE':
-        json['result'] = True
+        JSON['result'] = True
         return jsonify(JSON), 200
     
 if __name__ == "__main__":
